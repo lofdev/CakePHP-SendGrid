@@ -4,7 +4,7 @@
 
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
-<code>$params = array(
+<pre><code>$params = array(
 	'to' 			=> <recipient address>,  		REQUIRED - may be array<br/>
 	'subject 		=> <subject>,					REQUIRED<br/>
 	'from'			=> <sender address>,  			REQUIRED<br/>
@@ -19,7 +19,7 @@
 		<keys> => <values>,<br/>
 		<keys> => <values>,..    For doing bulk messages with single call<br/>
 	)	<br/>
-);</code>
+);</code></pre>
 
 
 ## Installation:
@@ -28,7 +28,7 @@ Copy entire repository into <code>app/controllers/components/</code> directory
 ## Configuration:
 Add <code>$sendgrid</code> configuration to <code>app/config/database.php</code> (as immediately below)
 
-<code>var $sendgrid = array (
+<pre><code>var $sendgrid = array (
 	'port'			=> '25', 
 	'timeout'		=> '30',
 	'host' 			=> 'smtp.sendgrid.net',
@@ -36,7 +36,7 @@ Add <code>$sendgrid</code> configuration to <code>app/config/database.php</code>
 	'password'		=> '<your password>',
 	'client' 		=> 'smtp_helo_hostname',
 	'support_email'	=> 'your_administrative_address@domain.com'
-);</code>
+);</code></pre>
 
 The support email address is used as the to-address when sending bulk emails, 
 and does not receive anything, but is needed so that CakePHP does not think that
