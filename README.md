@@ -5,19 +5,19 @@
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
 <pre><code>$params = array(
-	'to' 			=> \<recipient address\>,  		REQUIRED - may be array
-	'subject 		=> <subject>,					REQUIRED
-	'from'			=> <sender address>,  			REQUIRED
-	'reply-to'		=> <reply to address>,
-	'unique'		=> <unique id for x-SMTPAPI>,
-	'category'		=> <category for sendgrid reports>,
-	'layout'		=> <email layout filename>,
-	'template'		=> <template filename>,
-	'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
-	'delivery-type'	=> <smtp>,						DEFAULT = smtp
+	'to' 			=> {recipient address},  		REQUIRED - may be array
+	'subject 		=> {subject},					REQUIRED
+	'from'			=> {sender address},  			REQUIRED
+	'reply-to'		=> {reply to address},
+	'unique'		=> {unique id for x-SMTPAPI},
+	'category'		=> {category for sendgrid reports},
+	'layout'		=> {email layout filename},
+	'template'		=> {template filename},
+	'layout-type'	=> {[text|html|both]}, 			DEFAULT = both
+	'delivery-type'	=> {smtp},						DEFAULT = smtp
 	'merge-values' 	=> array(
-		<keys> => <values>,
-		<keys> => <values>,..    For doing bulk messages with single call
+		{keys} => {values},
+		{keys} => {values},..    For doing bulk messages with single call
 	)	
 );</code></pre>
 
