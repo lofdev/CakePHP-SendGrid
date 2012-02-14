@@ -5,20 +5,20 @@
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
 <code>$params = array(
-	'to' 			=> <recipient address>,  		REQUIRED - may be array
-	'subject 		=> <subject>,					REQUIRED
-	'from'			=> <sender address>,  			REQUIRED
-	'reply-to'		=> <reply to address>,
-	'unique'		=> <unique id for x-SMTPAPI>,
-	'category'		=> <category for sendgrid reports>,
-	'layout'		=> <email layout filename>,
-	'template'		=> <template filename>,
-	'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
-	'delivery-type'	=> <smtp>,						DEFAULT = smtp
-	'merge-values' 	=> array(
-		<keys> => <values>,
-		<keys> => <values>,..    For doing bulk messages with single call
-	)	
+	'to' 			=> <recipient address>,  		REQUIRED - may be array<br/>
+	'subject 		=> <subject>,					REQUIRED<br/>
+	'from'			=> <sender address>,  			REQUIRED<br/>
+	'reply-to'		=> <reply to address>,<br/>
+	'unique'		=> <unique id for x-SMTPAPI>,<br/>
+	'category'		=> <category for sendgrid reports>,<br/>
+	'layout'		=> <email layout filename>,<br/>
+	'template'		=> <template filename>,<br/>
+	'layout-type'	=> <[text|html|both]>, 			DEFAULT = both<br/>
+	'delivery-type'	=> <smtp>,						DEFAULT = smtp<br/>
+	'merge-values' 	=> array(<br/>
+		<keys> => <values>,<br/>
+		<keys> => <values>,..    For doing bulk messages with single call<br/>
+	)	<br/>
 );</code>
 
 
