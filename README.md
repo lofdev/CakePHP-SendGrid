@@ -1,5 +1,20 @@
 # CakePHP-SendGrid Component
 
+##  Copyright
+
+>  Sendgrid Email Component 
+>
+>  A CakePHP Component designed to easily integrate CakePHP
+>  with the wonderful service provided by SendGrid.com
+>
+>  Original coding: Dave Loftis (dave@lofdev.com)
+>
+>  Copyright (c) 2011 Dave Loftis.
+>  Licensed under MIT.
+>
+>  Last Update: Feb 14, 2011 - 12:01 MST (GMT-6:00)
+
+ 
 ## Usage (from controller):
 
 <code>$this->SendgridEmail->sendEmail($params);</code>

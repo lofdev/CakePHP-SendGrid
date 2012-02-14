@@ -8,75 +8,29 @@
  *  Original coding: Dave Loftis (dave@lofdev.com)
  *  -----------------------------------------
  *  Copyright (c) 2011 Dave Loftis.
- *  Licenced under version 2 of the GNU Public License.
+ *	Licensed under MIT License.
+ *
+ *	I'd love it if you're credit me, and tell me about your use, too.
  *
  *	Last Update: Feb 14, 2011 - 12:01 MST (GMT-6:00)
  */
  
- /*
- 	Usage (from controller):
- 	========================
- 	$this->SendgridEmail->sendEmail($params)
- 	
- 	$params should be in the following format:
- 	
-		 *	$params = 
-		 *	{
-		 *		'to' 			=> <recipient address>,  		REQUIRED - may be array
-		 *		'subject 		=> <subject>,					REQUIRED
-		 *		'from'			=> <sender address>,  			REQUIRED
-		 *		'reply-to'		=> <reply to address>,
-		 *		'unique'		=> <unique id for x-SMTPAPI>,
-		 *		'category'		=> <category for sendgrid reports>,
-		 *		'layout'		=> <email layout filename>,
-		 *		'template'		=> <template filename>,
-		 *		'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
-		 *		'delivery-type'	=> <smtp>,						DEFAULT = smtp
-		 *		'merge-values' 	=> array(
-		 *			<keys> => <values>,
-		 *			<keys> => <values>,..    For doing bulk messages with single call
-		 *		)	
-		 *	}
-		 *
  
- 	Installation:
- 	=============
- 	Copy entire repository into app/controllers/components/ directory
- 	
- 	Configuration:
- 	==============
- 	Add $sendgrid configuration to app/config/database.php (as immediately below)
- 	
-	 	var $sendgrid = array (
-			'port'			=> '25', 
-			'timeout'		=> '30',
-			'host' 			=> 'smtp.sendgrid.net',
-			'username'		=> '<your username>',
-			'password'		=> '<your password>',
-			'client' 		=> 'smtp_helo_hostname',
-			'support_email'	=> 'your_administrative_address@domain.com'
-		);
-	
-	The support email address is used as the to-address when sending bulk emails, 
-	and does not receive anything, but is needed so that CakePHP does not think that
-	and email without a normal SMTP to: address is invalid.
-	
-	
-	More information:
-	=================
-	Code written and maintained by Dave Loftis.  I am happy to help when and where I can
-	but can't promise that I will be able to spend huge amounts of time helping you, 
-	but I will offer all the support I can.
-	
-	Additional features coming soon, including:
-	  +  Basic support for SendGrid's EventAPI
-	  
-	Legacy Users:
-	=============
-	Poorly planned init() function remains in place.  New code should use sendEmail();
-	 
- */
+/*  
 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the 
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
 
 require_once(dirname(__FILE__) . '/sendgrid_lib/sendgrid_smtp_api_header.php');
  
