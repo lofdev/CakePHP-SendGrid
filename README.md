@@ -4,7 +4,7 @@
 
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
-> $params = array(
+<code>> $params = array(
 > >	'to' 			=> <recipient address>,  		REQUIRED - may be array
 > >	'subject 		=> <subject>,					REQUIRED
 > >	'from'			=> <sender address>,  			REQUIRED
@@ -19,7 +19,7 @@
 > >	> <keys> => <values>,
 > > > <keys> => <values>,..    For doing bulk messages with single call
 > >	)	
-> );
+> );</code>
 
 
 ## Installation:
