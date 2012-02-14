@@ -5,7 +5,7 @@
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
 <pre><code>$params = array(
-	'to' 			=> <recipient address>,  		REQUIRED - may be array
+	'to' 			=> \<recipient address\>,  		REQUIRED - may be array
 	'subject 		=> <subject>,					REQUIRED
 	'from'			=> <sender address>,  			REQUIRED
 	'reply-to'		=> <reply to address>,
