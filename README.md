@@ -2,16 +2,9 @@
 
 ##  Copyright
 
->  Sendgrid Email Component 
->
->  A CakePHP Component designed to easily integrate CakePHP
->  with the wonderful service provided by SendGrid.com
->
+>  A CakePHP Component designed to easily integrate CakePHP with the wonderful service provided by SendGrid.com
 >  Original coding: Dave Loftis (dave@lofdev.com)
->
->  Copyright (c) 2011 Dave Loftis.
->  Licensed under MIT.
->
+>  Copyright (c) 2011 Dave Loftis.<br/>Licensed: [MIT License](http://www.opensource.org/licenses/mit-license.php)
 >  Last Update: Feb 14, 2011 - 12:01 MST (GMT-6:00)
 
  
