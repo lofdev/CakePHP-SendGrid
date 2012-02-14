@@ -4,22 +4,22 @@
 
 <code>$this->SendgridEmail->sendEmail($params);</code>
 
-<code>> $params = array(
-> >	'to' 			=> <recipient address>,  		REQUIRED - may be array
-> >	'subject 		=> <subject>,					REQUIRED
-> >	'from'			=> <sender address>,  			REQUIRED
-> >	'reply-to'		=> <reply to address>,
-> >	'unique'		=> <unique id for x-SMTPAPI>,
-> >	'category'		=> <category for sendgrid reports>,
-> >	'layout'		=> <email layout filename>,
-> >	'template'		=> <template filename>,
-> >	'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
-> >	'delivery-type'	=> <smtp>,						DEFAULT = smtp
-> >	'merge-values' 	=> array(
-> >	> <keys> => <values>,
-> > > <keys> => <values>,..    For doing bulk messages with single call
-> >	)	
-> );</code>
+<code>$params = array(
+	'to' 			=> <recipient address>,  		REQUIRED - may be array
+	'subject 		=> <subject>,					REQUIRED
+	'from'			=> <sender address>,  			REQUIRED
+	'reply-to'		=> <reply to address>,
+	'unique'		=> <unique id for x-SMTPAPI>,
+	'category'		=> <category for sendgrid reports>,
+	'layout'		=> <email layout filename>,
+	'template'		=> <template filename>,
+	'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
+	'delivery-type'	=> <smtp>,						DEFAULT = smtp
+	'merge-values' 	=> array(
+		<keys> => <values>,
+		<keys> => <values>,..    For doing bulk messages with single call
+	)	
+);</code>
 
 
 ## Installation:
@@ -28,15 +28,15 @@ Copy entire repository into <code>app/controllers/components/</code> directory
 ## Configuration:
 Add <code>$sendgrid</code> configuration to <code>app/config/database.php</code> (as immediately below)
 
-> var $sendgrid = array (
-> > 'port'			=> '25', 
-> > 'timeout'		=> '30',
-> > 'host' 			=> 'smtp.sendgrid.net',
-> > 'username'		=> '<your username>',
-> > 'password'		=> '<your password>',
-> > 'client' 		=> 'smtp_helo_hostname',
-> > 'support_email'	=> 'your_administrative_address@domain.com'
-> );
+<code>var $sendgrid = array (
+	'port'			=> '25', 
+	'timeout'		=> '30',
+	'host' 			=> 'smtp.sendgrid.net',
+	'username'		=> '<your username>',
+	'password'		=> '<your password>',
+	'client' 		=> 'smtp_helo_hostname',
+	'support_email'	=> 'your_administrative_address@domain.com'
+);</code>
 
 The support email address is used as the to-address when sending bulk emails, 
 and does not receive anything, but is needed so that CakePHP does not think that
