@@ -7,47 +7,264 @@
  *  -----------------------------------------
  *  Original coding: Dave Loftis (dave@lofdev.com)
  *  -----------------------------------------
- *  Copyright (c) 2010 Vacation Rental Partner, Inc.
+ *  Copyright (c) 2011 Dave Loftis.
  *  Licenced under version 2 of the GNU Public License.
  *
- *	Last Update: Nov 2, 2010 - 12:08 MDT (GMT-7:00)
+ *	Last Update: Feb 14, 2011 - 12:01 MST (GMT-6:00)
  */
  
  /*
-  *  Usage:
-  *  ----------------------------------------------
-  *  $this->SendgridEmail->init($to, 
-  *								$from, 
-  *								$subject, 
-  *								$unique, 
-  *								$layout, 
-  *								$template, 
-  *								$category, 
-  *								$sendNow);
-  **/
+ 	Usage (from controller):
+ 	========================
+ 	$this->SendgridEmail->sendEmail($params)
+ 	
+ 	$params should be in the following format:
+ 	
+		 *	$params = 
+		 *	{
+		 *		'to' 			=> <recipient address>,  		REQUIRED - may be array
+		 *		'subject 		=> <subject>,					REQUIRED
+		 *		'from'			=> <sender address>,  			REQUIRED
+		 *		'reply-to'		=> <reply to address>,
+		 *		'unique'		=> <unique id for x-SMTPAPI>,
+		 *		'category'		=> <category for sendgrid reports>,
+		 *		'layout'		=> <email layout filename>,
+		 *		'template'		=> <template filename>,
+		 *		'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
+		 *		'delivery-type'	=> <smtp>,						DEFAULT = smtp
+		 *		'merge-values' 	=> array(
+		 *			<keys> => <values>,
+		 *			<keys> => <values>,..    For doing bulk messages with single call
+		 *		)	
+		 *	}
+		 *
+ 
+ 	Installation:
+ 	=============
+ 	Copy entire repository into app/controllers/components/ directory
+ 	
+ 	Configuration:
+ 	==============
+ 	Add $sendgrid configuration to app/config/database.php (as immediately below)
+ 	
+	 	var $sendgrid = array (
+			'port'			=> '25', 
+			'timeout'		=> '30',
+			'host' 			=> 'smtp.sendgrid.net',
+			'username'		=> '<your username>',
+			'password'		=> '<your password>',
+			'client' 		=> 'smtp_helo_hostname',
+			'support_email'	=> 'your_administrative_address@domain.com'
+		);
+	
+	The support email address is used as the to-address when sending bulk emails, 
+	and does not receive anything, but is needed so that CakePHP does not think that
+	and email without a normal SMTP to: address is invalid.
+	
+	
+	More information:
+	=================
+	Code written and maintained by Dave Loftis.  I am happy to help when and where I can
+	but can't promise that I will be able to spend huge amounts of time helping you, 
+	but I will offer all the support I can.
+	
+	Additional features coming soon, including:
+	  +  Basic support for SendGrid's EventAPI
+	  
+	Legacy Users:
+	=============
+	Poorly planned init() function remains in place.  New code should use sendEmail();
+	 
+ */
+
+
+require_once(dirname(__FILE__) . '/sendgrid_lib/sendgrid_smtp_api_header.php');
  
 App::import('Component', 'Email');
 class SendgridEmailComponent extends EmailComponent {
 
+	private $xSmtpApi;
+	private $xSmtpApi_vars; 
+	private $xSmtpApi_subs;
+	private $hasSendgridCredentials;
+
 	/**
-	 * I debated making this private, but decided to leave it public
-	 * since it's public in the parent.
+	 *	Copy the configuration information out of the app/config/database.php file 
+	 *	Use it to instance the parent component's option values 
 	 */
-	public $smtpOptions = array(
-		'port'=>'25', 
-		'timeout'=>'30',
-		'host' => 'smtp.sendgrid.net',
-		'username'=>'r',
-		'password'=>'',
-		'client' => 'smtp_helo_hostname'
-	);
-	private $xsmtpapi;
+	 
+	function __construct() {
+		parent::__construct();
+		$this->_configurate();
+	}
+	private function _configurate() {
+		
+		$this->hasSendgridCredentials = false;
+		
+		// Setup the Sendgrid X-SMTPAPI Array
+		$this->xSmtpApi = new SmtpApiHeader(); 
+		$this->xSmtpApi_vars = array();
+		$this->xSmtpApi_subs = array();
+	}
+	
+	private function _setupSendGridCredentials() {
+		$db = new DATABASE_CONFIG();
+		if (isset($db->sendgrid)) {
+			$this->smtpOptions = $db->sendgrid;
+			$this->hasSendgridCredentials = true;
+		}
+	}
+	
+	/*
+	 *  This function fixes a duplication of X-SMTPAPI in the header
+	 *	of the email that gets sent.  It could be fixed by changing the 
+	 *	output of asString() in SendGrid's PHP object, but to keep
+	 *	consistent with their code, this function is crucial.
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	private function _removeDuplicateHeaderLabels($string) {
+		return trim(str_replace('X-SMTPAPI:', '', $string));
+	}
 
+	function sendEmail($params = null) {
+		/*
+		 *	$params = 
+		 *	{
+		 *		'to' 			=> <recipient address>,  		REQUIRED - may be array
+		 *		'subject 		=> <subject>,					REQUIRED
+		 *		'from'			=> <sender address>,  			REQUIRED
+		 *		'reply-to'		=> <reply to address>,
+		 *		'unique'		=> <unique id for x-SMTPAPI>,
+		 *		'category'		=> <category for sendgrid reports>,
+		 *		'layout'		=> <email layout filename>,
+		 *		'template'		=> <template filename>,
+		 *		'layout-type'	=> <[text|html|both]>, 			DEFAULT = both
+		 *		'delivery-type'	=> <smtp>,						DEFAULT = smtp
+		 *		'merge-values' 	=> array(
+		 *			<keys> => <values>,
+		 *			<keys> => <values>,..    For doing bulk messages with single call
+		 *		)	
+		 *	}
+		 */
+		 
+		//  Sucks that this doesn't work in the constructor
+		if (!$this->hasSendgridCredentials) $this->_setupSendGridCredentials();
+		if (!$this->hasSendgridCredentials) return false; //  We cannot do this if no credentials
+		
+	 	
+	 	//  Setup Message Basics
+		$this->setTo($params['to']);
+		$this->setFrom($params['from']);
+		//  If you pass an explicit reply-to address, use that, otherwise the from address
+		if (isset($params['reply-to'])) $this->setReplyTo($params['reply-to']);
+		else $this->setReplyTo($params['from']);
+		$this->setSubject($params['subject']);
+		
+		//  Setup CakePHP layout and template files for the email
+		if (isset($params['layout'])) $this->setLayout($params['layout']);
+		if (isset($params['template'])) $this->setTemplate($params['template']);
+		
+		//  Set sendAs content-type
+		if (isset($params['layout-type'])) $this->setSendAs($params['layout-type']);
+		else $this->setSendAs('both');
+		
+		//  Set delivery type
+		if (isset($params['delivery-type'])) $this->setDelivery($params['delivery-type']);
+		else $this->setDelivery('smtp');
+		
+		//  Setup SendGrid Unique Message ID
+		if (isset($params['unique'])) $this->setSendGridUnique($params['unique']);
+		//  Setup Sendgrid Substitution Values
+		if (isset($params['merge-values']) && is_array($params['merge-values'])) $this->setSubstitution($params['merge-values']);
+		
+		//  Send the message
+		return $this->send();
+	
+	}
 
-
+	
+	
+	/*  Implementing setter functions for all major elements of email
+	 *  NOT strictly needed, but for ease of migration, etc, I am 
+	 *  abstracting things.
+	 */
+	function setTo($address = null) {
+		
+		if (!$address) return false;
+		
+		//  It's possible to setup sendgrid to send multiple emails based on a single request
+		//  Basically this is like a mail merge
+		if (is_array($address)) {
+			$this->to = $this->smtpOptions['support_email'];		
+			//  Set the SendGrid to value(s)
+			$this->xSmtpApi->addTo($address);
+		}
+		else $this->to = $address; 
+	}
+	function setSubject($subject = null) {
+		$this->subject = $subject;
+	}
+	function setReplyTo($address = null) {
+		$this->replyTo = $address;
+	}
+	function setFrom($address = null) {
+		$this->from = $address;
+	}
+	function setLayout($layout = null) {
+		$this->layout = str_replace('.ctp','',$layout);  //  Just to be nice
+	}
+	function setTemplate($template = null) {
+		$this->template = str_replace('.ctp','',$template);  //  Just to be nice
+	}
+	function setSendAs($as = 'both') {
+		$this->sendAs = $as;
+	}
+	function setDelivery($type = 'smtp') {
+		$this->delivery = $type;
+	}
+	function setSendGridUnique($unique) {
+		$this->xSmtpApi->addFilterSetting('opentrack', 'enable', 1);
+		$this->xSmtpApi_vars['messageID'] = $unique;
+	}
+	function setCategory($category) {
+		$this->xSmtpApi_vars['category'] = $category;
+	}
+	function setSubstitution($subs) {
+		$this->xSmtpApi_subs = $subs;
+	}
+	
+	
+	
+	
 
 	/**
-	 * Initialize an Email
+	 *  Send Function
+	 *
+	 *	Sets the SendGrid X-SMTPAPI Header and sends the email
+	 */
+	function send() {
+		//  Set any unique variables
+		$this->xSmtpApi->setUniqueArgs($this->xSmtpApi_vars);
+		
+		//  Handle any substitutions
+		foreach ($this->xSmtpApi_subs as $k => $v) {
+			$this->xSmtpApi->addSubVal($k,$v);
+		}
+		if ($this->xSmtpApi->as_string() != 'X-SMTPAPI: null') 
+			//  DO NOT MODIFY THIS LINE
+			$this->headers['SMTPAPI'] = $this->_removeDuplicateHeaderLabels($this->xSmtpApi->as_string());
+		return parent::send();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * Initialize an Email  - DEPRECATED - DO NOT USE
 	 *
 	 * Input
 	 *	 string $to	      (Email Address)
@@ -61,102 +278,24 @@ class SendgridEmailComponent extends EmailComponent {
 	 */
 	function init($to, $from, $subject, $unique = null, $layout = null, $template = null, $category = null, $sendNow = false) {
 	
-		$this->to = $to;
-		$this->subject = $subject;
-		//  Reply to and From are the same by default, but you can change them if you want
-		$this->replyTo = $from;
-		$this->from = $from;
-		//echo 'To: ' . $this->to;
-		$this->template = str_replace('.ctp','',$template); 	//  Just to be nice
-		$this->sendAs = 'both';									//  Best practice, don't change - unless you want to
-		$this->delivery = 'smtp';			
-	
-		// Setup the Sendgrid X-SMTPAPI Array
-		$this->xsmtpapi = new SmtpApiHeader(); 
-		$this->xsmtpapi->addTo($to);
-		if ($unique) {
-			$this->xsmtpapi->addFilterSetting('opentrack', 'enable', 1);
-			$this->xsmtpapi->setUniqueArgs(array('messageID' => $unique));
-		}
-		if ($sendNow) return $this->send();
-	}
-
-	/**
-	 *  Send Function
-	 *
-	 *	Sets the SendGrid X-SMTPAPI Header and sends the email
-	 */
-	function send() {
-		//$this->additionalParams = $this->getJsonSGHeader();
-		$this->headers['SMTPAPI'] = $this->xsmtpapi->as_string();
-		return parent::send();
+		$params = array(
+			'to'			=> $to,
+			'from'			=> $from,
+			'reply-to'		=> $from,
+			'subject'		=> $subject,
+			'layout'		=> $layout,
+			'template'		=> $template,
+			'layout-type'	=> 'both',
+			'delivery-type'	=> 'smtp',
+			'unique'		=> $unique
+		);
+		
+		return $this->sendEmail($params);
 	}
 
 }
 
 
-
-/*  This is in this file simply for ease of distribution  
- *  The following code is a (slightly) modified SendGrid Example, and can be
- *  found here: http://wiki.sendgrid.com/doku.php?id=smtpapiheader.php  
- *
- *  The copyright notice above does not apply to the following code.
- **/
-class SmtpApiHeader {
-  var $data; 
-  function addTo($tos) {
-    if (!isset($this->data['to']))  {
-      $this->data['to'] = array();
-    }
-    $this->data['to'] = array_merge($this->data['to'], (array)$tos);
-  }
-  function addSubVal($var, $val) {
-    if (!isset($this->data['sub']))  {
-      $this->data['sub'] = array();
-    }
- 
-    if (!isset($this->data['sub'][$var])) {
-      $this->data['sub'][$var] = array();
-    }
-    $this->data['sub'][$var] = array_merge($this->data['sub'][$var], (array)$val);
-  }
-  function setUniqueArgs($val) {
-    if (!is_array($val)) return;
-    $diff = array_diff_assoc($val, array_values($val));
-    if(((empty($diff)) ? false : true)) {
-      $this->data['unique_args'] = $val;
-    } 
-  }
-  function setCategory($cat) {
-    $this->data['category'] = $cat;
-  }
-  function addFilterSetting($filter, $setting, $value) {
-    if (!isset($this->data['filters']))  {
-      $this->data['filters'] = array();
-    }
- 
-    if (!isset($this->data['filters'][$filter]))  {
-      $this->data['filters'][$filter] = array();
-    }
- 
-    if (!isset($this->data['filters'][$filter]['settings']))  {
-      $this->data['filters'][$filter]['settings'] = array();
-    }
-    $this->data['filters'][$filter]['settings'][$setting] = $value;
-  }
-  function asJSON() {
-    $json = json_encode($this->data);
-    $json = preg_replace('/(["\]}])([,:])(["\[{])/', '$1$2 $3', $json);
-    return $json;
-  }
-  function as_string() {
-    $json = $this->asJSON();
-    //  Modified from SendGrid Example to work with CakePHP Email component
-    $str = wordwrap($json, 76, "\n   ");
-    return $str;
-  }
- 
-}
 
 
 ?>
