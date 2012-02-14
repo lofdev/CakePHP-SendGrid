@@ -7,6 +7,7 @@
 >  Original coding: Dave Loftis (dave@lofdev.com)
 >
 >  Copyright (c) 2011 Dave Loftis.<br/>Licensed: [MIT License](http://www.opensource.org/licenses/mit-license.php)
+>
 >  Last Update: Feb 14, 2011 - 12:01 MST (GMT-6:00)
 
  
